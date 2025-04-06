@@ -9,6 +9,7 @@ import { Button } from "./ui/button";
 import { useToast } from "./ui/use-toast";
 import { bunnyService } from "../lib/bunny-service";
 import { UploadManager } from "../lib/upload-manager";
+import { Year } from "../types/common";
 import { cache } from "../lib/cache";
 import { cn } from "@/lib/utils";
 import { dataStorage } from "@/lib/data-storage";
@@ -55,10 +56,10 @@ interface VideoProcessingFormProps {
   collections?: Collection[];
   selectedLibrary?: string;
   selectedCollection?: string;
-  selectedYear?: string;
+  selectedYear?: Year;
   onLibraryChange?: (value: string) => void;
   onCollectionChange?: (value: string) => void;
-  onYearChange?: (value: string) => void;
+  onYearChange?: (value: Year) => void;
   disabled?: boolean;
 }
 
@@ -142,6 +143,36 @@ const VideoProcessingForm = ({
     );
   }, [collections, collectionSearch]);
 
+  const sortVideos = (videos: any[]) => {
+    return [...videos].sort((a, b) => {
+      // Extract lecture numbers
+      const getLectureNumber = (title: string) => {
+        const match = title.match(/Lecture (\d+)/i);
+        return match ? parseInt(match[1]) : 0;
+      };
+
+      // Extract question numbers
+      const getQuestionNumber = (title: string) => {
+        const match = title.match(/Q(\d+)/i);
+        return match ? parseInt(match[1]) : 0;
+      };
+
+      const lectureA = getLectureNumber(a.title);
+      const lectureB = getLectureNumber(b.title);
+      const questionA = getQuestionNumber(a.title);
+      const questionB = getQuestionNumber(b.title);
+
+      // Sort by lecture number first (descending)
+      if (lectureA !== lectureB) {
+        return lectureB - lectureA; // Higher lecture numbers first
+      }
+
+      // Then sort by question number
+      return questionA - questionB;
+    });
+  };
+
+  // Update the fetchVideos useCallback to use the new sorting
   const fetchVideos = useCallback(async () => {
     if (!selectedLibrary || !selectedCollection) return;
     try {
@@ -152,7 +183,7 @@ const VideoProcessingForm = ({
         accessToken,
       );
       setVideos(fetchedVideos);
-      setSortedVideos(fetchedVideos); // Already sorted in bunnyService
+      setSortedVideos(sortVideos(fetchedVideos)); // Apply custom sorting
     } catch (error) {
       console.error("Error fetching videos:", error);
       toast({
@@ -250,8 +281,9 @@ const VideoProcessingForm = ({
       return;
     }
 
-    // Clear previous uploads if they're done
+    // تنظيف القوائم السابقة فقط عند اختيار ملفات جديدة
     uploadManagerRef.current?.clearQueue();
+    setAutoUploadFiles([]); 
     
     const fileArray = Array.from(files);
     setSelectedFiles(fileArray);
@@ -298,6 +330,8 @@ const VideoProcessingForm = ({
     setIsAutoUploading(true);
     try {
       await uploadManagerRef.current?.startUpload(autoUploadFiles, selectedYear);
+      // تنظيف فقط الملفات المحددة بعد اكتمال الرفع، دون تنظيف القائمة
+      setAutoUploadFiles([]);
     } catch (error) {
       toast({
         title: "Error",
@@ -310,22 +344,24 @@ const VideoProcessingForm = ({
   };
 
   const startManualUpload = async () => {
-    if (!selectedFiles.length) {
+    if (!selectedFiles.length || !selectedLibrary || !selectedCollection) {
       toast({
         title: "Error",
-        description: "Please select files to upload",
+        description: "Please select files, library and collection first",
         variant: "destructive",
       });
       return;
     }
-
+  
     setIsUploading(true);
     try {
-      // Use selected library and collection for manual uploads
+      const libraryInfo = libraries.find(lib => lib.id === selectedLibrary);
+      const collectionInfo = collections.find(col => col.id === selectedCollection);
+      
       await uploadManagerRef.current?.startManualUpload(
         selectedFiles,
-        selectedLibrary,
-        selectedCollection,
+        libraryInfo?.name || selectedLibrary, // Pass library name instead of ID
+        collectionInfo?.name || selectedCollection, // Pass collection name instead of ID
         selectedYear
       );
     } catch (error) {
@@ -336,6 +372,7 @@ const VideoProcessingForm = ({
       });
     } finally {
       setIsUploading(false);
+      setSelectedFiles([]); // Clear selected files after upload
     }
   };
 

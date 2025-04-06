@@ -28,3 +28,32 @@ export default {
 - Replace `plugin:@typescript-eslint/recommended` to `plugin:@typescript-eslint/recommended-type-checked` or `plugin:@typescript-eslint/strict-type-checked`
 - Optionally add `plugin:@typescript-eslint/stylistic-type-checked`
 - Install [eslint-plugin-react](https://github.com/jsx-eslint/eslint-plugin-react) and add `plugin:react/recommended` & `plugin:react/jsx-runtime` to the `extends` list
+
+# Bunny Uploader
+A tool for uploading and managing videos on Bunny.net CDN with Google Sheets integration.
+
+## Getting Started
+
+To run this application locally:
+
+```bash
+# Install dependencies
+npm install
+
+# Start the development server and backend API simultaneously
+npm run dev
+```
+
+The application will be available at http://localhost:5173
+
+## API Server Setup
+
+The application requires a backend server running for Google Sheets integration and other API functions. The server runs on port 3001 by default.
+
+### Cross-Origin Resource Sharing (CORS)
+
+The server is configured to handle CORS requests in development mode. If you're experiencing CORS issues:
+
+1. Make sure you're running both the frontend and backend services:
+   ```bash
+   npm run dev

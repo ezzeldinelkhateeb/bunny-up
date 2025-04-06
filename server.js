@@ -14,11 +14,11 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// CORS configuration based on environment
+// Updated CORS configuration to accept all origins in development
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
     ? ['your-production-domain.com'] 
-    : ['http://localhost:5173'],
+    : true, // Allow all origins in development
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
 };
@@ -196,13 +196,16 @@ app.post('/api/sheets/update-bandwidth-stats', async (req, res) => {
   }
 });
 
-// Test endpoint for Google Sheets connection
+// Add a proper handler for the test-sheets-connection endpoint
 app.get('/api/test-sheets-connection', async (req, res) => {
   try {
-    const credentials = JSON.parse(process.env.GOOGLE_SHEETS_CREDENTIALS_JSON);
+    const credentials = JSON.parse(process.env.GOOGLE_SHEETS_CREDENTIALS_JSON || '{}');
     
-    if (!credentials || !process.env.GOOGLE_SHEETS_SPREADSHEET_ID) {
-      throw new Error('Missing required configuration');
+    if (!credentials || !Object.keys(credentials).length) {
+      return res.status(400).json({
+        success: false,
+        message: 'Google Sheets credentials not configured'
+      });
     }
 
     const auth = new google.auth.GoogleAuth({

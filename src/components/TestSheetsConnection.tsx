@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
-import { Button } from './ui/button';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
+import { toast } from '@/components/ui/use-toast';
 import { Loader2 } from 'lucide-react';
-import { toast } from './ui/use-toast';
 
 export function TestSheetsConnection() {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,6 +15,9 @@ export function TestSheetsConnection() {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
+        // Add proper CORS mode
+        mode: 'cors',
+        credentials: 'same-origin'
       });
       
       if (!response.ok) {
@@ -41,7 +44,7 @@ export function TestSheetsConnection() {
       console.error('Test connection error:', error);
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : String(error),
+        description: error instanceof Error ? error.message : "Failed to connect to server",
         variant: "destructive",
       });
     } finally {
@@ -50,13 +53,15 @@ export function TestSheetsConnection() {
   };
 
   return (
-    <Button 
-      onClick={testConnection} 
-      disabled={isLoading}
-      className="flex gap-2 items-center"
-    >
-      {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
-      Test Sheets Connection
+    <Button onClick={testConnection} disabled={isLoading}>
+      {isLoading ? (
+        <>
+          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          Testing...
+        </>
+      ) : (
+        'Test Sheets Connection'
+      )}
     </Button>
   );
 }
