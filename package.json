@@ -3,12 +3,15 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-"scripts": {
-  "dev:server": "cross-env NODE_OPTIONS=\"--openssl-legacy-provider\" nodemon server.js",
-  "dev:client": "vite",
-  "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
-  "build": "your build command here"
-},
+  "scripts": {
+    "dev:server": "cross-env NODE_OPTIONS=\"--openssl-legacy-provider\" nodemon server.js",
+    "dev:client": "vite",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "build": "vite build",
+    "build:server": "mkdir -p dist/server && cp server.js dist/server/",
+    "build:all": "npm run build && npm run build:server",
+    "start": "cross-env NODE_ENV=production node server.js"
+  },
   "dependencies": {
     "@hookform/resolvers": "^3.6.0",
     "@radix-ui/react-accordion": "^1.1.2",
