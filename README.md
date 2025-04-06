@@ -46,7 +46,35 @@ npm run dev
 
 The application will be available at http://localhost:5173
 
-## API Server Setup
+## Deployment on Netlify
+
+This application is configured for deployment on Netlify using Netlify Functions for the API endpoints.
+
+### Deploying to Netlify
+
+1. Push your code to a Git repository (GitHub, GitLab, etc.)
+2. Create a new site on Netlify and connect it to your repository
+3. Configure the build settings:
+   - Build command: `npm run build:netlify`
+   - Publish directory: `dist`
+
+### Environment Variables in Netlify
+
+In your Netlify site dashboard, go to **Site settings** > **Build & Deploy** > **Environment variables** and add:
+
+- `GOOGLE_SHEETS_CREDENTIALS_JSON`: The full JSON string of your Google service account credentials
+- `GOOGLE_SHEETS_SPREADSHEET_ID`: Your Google Sheets spreadsheet ID
+- `GOOGLE_SHEET_NAME`: The name of your sheet (default is "OPERATIONS")
+
+### Troubleshooting Netlify Deployment
+
+If you encounter issues with the Netlify Functions:
+
+1. Check the Netlify Functions logs in your Netlify dashboard
+2. Ensure all environment variables are correctly set
+3. Verify that the Google service account has permission to access your spreadsheet
+
+## API Server Setup (Local Development)
 
 The application requires a backend server running for Google Sheets integration and other API functions. The server runs on port 3001 by default.
 
@@ -57,3 +85,15 @@ The server is configured to handle CORS requests in development mode. If you're 
 1. Make sure you're running both the frontend and backend services:
    ```bash
    npm run dev
+```
+
+### Google Sheets Permissions
+
+This application requires a Google Service Account with write permissions to the spreadsheet:
+
+1. Make sure the service account email has been granted Editor access to the Google Sheet
+2. To grant access, open your Google Sheet, click "Share" and add the service account email with Editor permissions
+3. If you're experiencing permission errors when updating sheets, check:
+   - That the correct service account is being used (check the .env file)
+   - That the service account has been explicitly granted access to the spreadsheet
+   - The spreadsheet ID in your .env file matches the actual spreadsheet you want to access

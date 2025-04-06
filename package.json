@@ -8,8 +8,7 @@
     "dev:client": "vite",
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "build": "vite build",
-    "build:server": "mkdir -p dist/server && cp server.js dist/server/",
-    "build:all": "npm run build && npm run build:server",
+    "build:netlify": "vite build && cp netlify/functions/*.js dist/netlify/functions/",
     "start": "cross-env NODE_ENV=production node server.js"
   },
   "dependencies": {

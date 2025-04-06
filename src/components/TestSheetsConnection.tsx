@@ -9,13 +9,14 @@ export function TestSheetsConnection() {
   const testConnection = async () => {
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/test-sheets-connection', {
+      // Get the base URL depending on environment
+      const apiBase = import.meta.env.PROD ? '/.netlify/functions' : 'http://localhost:3001/api';
+      const response = await fetch(`${apiBase}/test-sheets-connection`, {
         method: 'GET',
         headers: {
           'Accept': 'application/json',
           'Content-Type': 'application/json',
         },
-        // Add proper CORS mode
         mode: 'cors',
         credentials: 'same-origin'
       });
@@ -29,13 +30,15 @@ export function TestSheetsConnection() {
       if (data.success) {
         toast({
           title: "Success",
-          description: `Connected to sheet: ${data.data.sheetName}`,
+          description: `Connected to sheet: ${data.data.sheetName}${data.data.serviceAccount ? ` using account: ${data.data.serviceAccount}` : ''}`,
+          duration: 5000,
         });
       } else {
         toast({
           title: "Error",
           description: data.message,
           variant: "destructive",
+          duration: 5000,
         });
       }
       
@@ -46,6 +49,7 @@ export function TestSheetsConnection() {
         title: "Error",
         description: error instanceof Error ? error.message : "Failed to connect to server",
         variant: "destructive",
+        duration: 5000,
       });
     } finally {
       setIsLoading(false);
